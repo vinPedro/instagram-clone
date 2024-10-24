@@ -1,0 +1,22 @@
+services:
+  backend:
+    stdin_open: true
+    tty: true
+    command: bash
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/instagram/:/home/instagram
+
+  frontend:
+    stdin_open: true
+    tty: true
+    command: bash
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/instagram/:/home/instagram
