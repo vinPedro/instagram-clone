@@ -4,7 +4,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.edu.ifpb.instagram.entity.UserEntity;
+import br.edu.ifpb.instagram.model.entity.UserEntity;
 import br.edu.ifpb.instagram.model.dto.UserDto;
 import br.edu.ifpb.instagram.repository.UserRepository;
 import br.edu.ifpb.instagram.service.UserService;
