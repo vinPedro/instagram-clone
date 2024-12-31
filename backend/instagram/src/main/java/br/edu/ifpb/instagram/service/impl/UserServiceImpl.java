@@ -2,6 +2,7 @@ package br.edu.ifpb.instagram.service.impl;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.edu.ifpb.instagram.model.entity.UserEntity;
@@ -15,15 +16,16 @@ public class UserServiceImpl implements UserService{
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     @Override
     public UserDto createUser(UserDto user) {
 
         UserEntity userEntity = new UserEntity();
         BeanUtils.copyProperties(user, userEntity);
 
-        // temporary
-        userEntity.setEncryptedPassword("ENCRYPTED-PASSWORD-TEST");
-        userEntity.setUserId("USER-ID-TEST");
+        userEntity.setEncryptedPassword(passwordEncoder.encode(user.getPassword()));
 
         UserEntity storedUserEntity = userRepository.save(userEntity);
 

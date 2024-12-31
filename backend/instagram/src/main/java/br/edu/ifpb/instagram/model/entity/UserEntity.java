@@ -1,52 +1,71 @@
-package br.edu.ifpb.instagram.model.dto;
+package br.edu.ifpb.instagram.model.entity;
 
 import java.io.Serializable;
 
-public class UserDto implements Serializable{
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 
-    private static final long serialVersionUID = 7293840579190289061L;
+@Entity(name = "users")
+public class UserEntity implements Serializable {
+    private static final long serialVersionUID = -4376108944411749501L;
+
+    @Id
+    @GeneratedValue
     private long id;
+
+    @Column(nullable = false, length = 100)
     private String fullName;
+
+    @Column(nullable = false, length = 50)
     private String username;
-    private String email;
-    private String password;
+
+    @Column(nullable = false)
     private String encryptedPassword;
+
+    @Column(nullable = false, length = 120)
+    private String email;
+
 
     public long getId() {
         return id;
     }
+
     public void setId(long id) {
         this.id = id;
     }
+
     public String getFullName() {
         return fullName;
     }
+
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
+
     public String getUsername() {
         return username;
     }
+
     public void setUsername(String username) {
         this.username = username;
     }
-    public String getEmail() {
-        return email;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    public String getPassword() {
-        return password;
-    }
-    public void setPassword(String password) {
-        this.password = password;
-    }
+
     public String getEncryptedPassword() {
         return encryptedPassword;
     }
+
     public void setEncryptedPassword(String encryptedPassword) {
         this.encryptedPassword = encryptedPassword;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 }
