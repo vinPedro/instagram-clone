@@ -30,19 +30,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         UserDto userDto = new UserDto();
         BeanUtils.copyProperties(userEntity, userDto);
 
-        List<SimpleGrantedAuthority> authList = getAuthorities("admin");
-
-        User user = new User(userDto.getUsername(), userDto.getEncryptedPassword(), authList);
+        // cria uma lista vazia só para atender o requisito do Spring Security
+        User user = new User(userDto.getUsername(), userDto.getEncryptedPassword(), new ArrayList<>());
 
         return user;
     }
-
-    private List<SimpleGrantedAuthority> getAuthorities(String role) {
-        // cria uma lista de authorities só para atender o requisito do Spring Security
-        List<SimpleGrantedAuthority> authList = new ArrayList<>();
-        authList.add(new SimpleGrantedAuthority("ROLE_USER"));
-
-        return authList;
-    }
-
 }
