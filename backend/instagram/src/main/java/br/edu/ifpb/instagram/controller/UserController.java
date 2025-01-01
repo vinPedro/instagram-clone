@@ -1,5 +1,8 @@
 package br.edu.ifpb.instagram.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,8 +26,18 @@ public class UserController {
     UserService userService;
 
     @GetMapping
-    public String getUser(){
-        return "get user was called";
+    public List<UserDetailsResponseModel> getUser(){
+
+        List<UserDto> userDtos = userService.findAll(); // get all users from database
+        List<UserDetailsResponseModel> userDetailsResponseModels = new ArrayList<>(); // response that we will send back to frontend
+
+        for (UserDto userDto : userDtos) {
+            UserDetailsResponseModel userDetailsResponseModel = new UserDetailsResponseModel(); // object to move across several layers
+            BeanUtils.copyProperties(userDto, userDetailsResponseModel); // copies properties from userDto to userDetailsResponseModel
+            userDetailsResponseModels.add(userDetailsResponseModel); // adds userDetailsResponseModel to userDetailsResponseModels
+        }
+
+        return userDetailsResponseModels; // returns to frontend
     }
 
     @PostMapping
