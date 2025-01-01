@@ -23,13 +23,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userRepository
-            .findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException(username)),
+        BeanUtils.copyProperties(
+            userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username)),
             userDto
         );
 
-        // cria uma lista vazia só para atender o requisito do Spring Security
+        // creates a empty arraylist to satisfy User Spring Security requirements
         User user = new User(userDto.getUsername(), userDto.getEncryptedPassword(), new ArrayList<>());
 
         return user;
