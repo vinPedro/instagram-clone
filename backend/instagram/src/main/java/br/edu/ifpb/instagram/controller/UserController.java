@@ -7,6 +7,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +27,7 @@ public class UserController {
     UserService userService;
 
     @GetMapping
-    public List<UserDetailsResponseModel> getUser(){
+    public List<UserDetailsResponseModel> getUsers(){
 
         List<UserDto> userDtos = userService.findAll(); // get all users from database
         List<UserDetailsResponseModel> userDetailsResponseModels = new ArrayList<>(); // response that we will send back to frontend
@@ -38,6 +39,17 @@ public class UserController {
         }
 
         return userDetailsResponseModels; // returns to frontend
+    }
+
+
+    @GetMapping("/{id}")
+    public UserDetailsResponseModel getUser(@PathVariable Long id){
+
+        UserDto userDto = userService.findById(id);
+        UserDetailsResponseModel userDetailsResponseModel = new UserDetailsResponseModel();
+        BeanUtils.copyProperties(userDto, userDetailsResponseModel);
+
+        return userDetailsResponseModel;
     }
 
     @PostMapping
@@ -63,13 +75,32 @@ public class UserController {
     }
 
     @PutMapping
-    public String updateUser(){
-        return "update user was called";
+    public UserDetailsResponseModel updateUser(@RequestBody UserDetailsRequestModel userDetailsRequestModel){
+        // response that we will send back to frontend
+        UserDetailsResponseModel userDetailsResponseModel = new UserDetailsResponseModel();
+
+        // object to move across several layers
+        UserDto userDto = new UserDto();
+
+        // copies properties from userDetailsRequestModel to userDto
+        BeanUtils.copyProperties(userDetailsRequestModel, userDto);
+
+        // saves the object in the database
+        UserDto updatedUserDto = userService.updateUser(userDto);
+
+        // copies properties from createdUserDto to userDetailsResponseModel
+        BeanUtils.copyProperties(updatedUserDto, userDetailsResponseModel);
+
+        // returns to frontend
+        return userDetailsResponseModel;
     }
 
-    @DeleteMapping
-    public String deleteUser(){
-        return "delete user was called";
+    @DeleteMapping("/{id}")
+    public String deleteUser(@PathVariable Long id){
+
+        userService.deleteUser(id);
+
+        return "user was deleted!";
     }
 
 }

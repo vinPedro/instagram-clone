@@ -1,12 +1,19 @@
 package br.edu.ifpb.instagram.model.request;
 
 public class UserDetailsRequestModel {
+
+    private Long id = null;
     private String email;
     private String password;
     private String fullName;
     private String username;
 
-
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
     public String getEmail() {
         return email;
     }

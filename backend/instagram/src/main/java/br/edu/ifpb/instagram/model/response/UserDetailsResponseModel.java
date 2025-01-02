@@ -2,17 +2,16 @@ package br.edu.ifpb.instagram.model.response;
 
 public class UserDetailsResponseModel {
 
-    private String userId;
+    private Long id;
     private String fullName;
     private String username;
     private String email;
 
-
-    public String getUserId() {
-        return userId;
+    public Long getId() {
+        return id;
     }
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setId(Long id) {
+        this.id = id;
     }
     public String getFullName() {
         return fullName;

@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService{
     public UserDto createUser(UserDto user) {
 
         UserEntity userEntity = new UserEntity();
-        BeanUtils.copyProperties(user, userEntity);
+        BeanUtils.copyProperties(user, userEntity, "id");
 
         userEntity.setEncryptedPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -38,6 +38,45 @@ public class UserServiceImpl implements UserService{
         return returnUserDtoDetails;
     }
 
+    @Override
+    public UserDto updateUser(UserDto user) {
+
+        if(user.getPassword() != null && !user.getPassword().isEmpty()){
+            user.setEncryptedPassword(passwordEncoder.encode(user.getPassword()));
+        }else {
+            user.setEncryptedPassword(null);
+        }
+
+        Integer linhasModificadas = userRepository.updatePartialUser(
+                user.getFullName(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getEncryptedPassword(),
+                user.getId()
+        );
+
+        if (linhasModificadas == 0) {
+            throw new RuntimeException("User not found");
+        }
+
+        return user;
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserDto findById(Long id) {
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        UserDto userDto = new UserDto();
+        BeanUtils.copyProperties(userEntity, userDto);
+        return userDto;
+    }
+
+    @Override
     public List<UserDto> findAll() {
         List<UserEntity> userEntities = userRepository.findAll();
         List<UserDto> userDtos = new ArrayList<>();

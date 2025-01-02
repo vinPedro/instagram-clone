@@ -10,5 +10,8 @@ import br.edu.ifpb.instagram.model.dto.UserDto;
 public interface UserService {
 
     UserDto createUser(UserDto user);
+    UserDto updateUser(UserDto user);
+    void deleteUser(Long id);
     List<UserDto> findAll();
+    UserDto findById(Long id);
 }
