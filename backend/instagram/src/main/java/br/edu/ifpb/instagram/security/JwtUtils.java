@@ -24,12 +24,10 @@ public class JwtUtils {
             KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA512");
             SecretKey secretKey = keyGen.generateKey();
             this.jwtSecret = secretKey.getEncoded();
-
         } catch (Exception e) {
             System.err.println("Erro ao criar o gerador de chaves: " + e.getMessage());
         }
     }
-
 
     // Gera o token JWT
     public String generateToken(Authentication authentication) {
