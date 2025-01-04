@@ -8,28 +8,21 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.Base64;
 import java.util.Date;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 
 @Component
 public class JwtUtils {
 
-    private final int jwtExpirationMs = 86400000;   // Tempo de expiração: 24h
-    private byte[] jwtSecret;
+    private final int jwtExpirationMs = 86400000; // 24 hours expiration time
+    private static final String SECRET_KEY = "umaChaveMuitoSeguraDePeloMenos64CaracteresParaHS512JwtAlgoritmo";
+
+    private final byte[] jwtSecret;
 
     public JwtUtils() {
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA512");
-            SecretKey secretKey = keyGen.generateKey();
-            this.jwtSecret = secretKey.getEncoded();
-        } catch (Exception e) {
-            System.err.println("Erro ao criar o gerador de chaves: " + e.getMessage());
-        }
+        this.jwtSecret = Base64.getEncoder().encode(SECRET_KEY.getBytes());
     }
 
-    // Gera o token JWT
     public String generateToken(Authentication authentication) {
 
         String username = authentication.getName();
@@ -38,14 +31,13 @@ public class JwtUtils {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(Keys.hmacShaKeyFor(jwtSecret), SignatureAlgorithm.HS512)
+                .signWith(Keys.hmacShaKeyFor(this.jwtSecret), SignatureAlgorithm.HS512)
                 .compact();
     }
 
-    // Valida o token JWT
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(this.jwtSecret).build().parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             System.err.println("Token inválido: " + e.getMessage());
@@ -53,10 +45,9 @@ public class JwtUtils {
         }
     }
 
-    // Extrai o username do token
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(jwtSecret)
+                .setSigningKey(this.jwtSecret)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
