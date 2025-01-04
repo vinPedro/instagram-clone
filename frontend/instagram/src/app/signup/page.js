@@ -6,6 +6,7 @@ import Form from 'next/form'
 
 import Footer from '../components/footer';
 
+
 export default function Signup() {
 
   return (
@@ -17,7 +18,7 @@ export default function Signup() {
                     Sign up to see photos and videos from your friends.
                 </div>
                 <div className="justify-items-center w-full grow">
-                    <Form action="/" className="mt-10 w-64 flex flex-col gap-3">
+                    <Form action="/" className="mt-10 mb-10 w-64 flex flex-col gap-3 mx-auto">
                         <input className="w-full rounded border bg-gray-100 p-2 text-xs" name="email" type="text" placeholder="Entre com seu Email" />
                         <input className="w-full rounded border bg-gray-100 p-2 text-xs" name="password" type="password" placeholder="Entre com sua senha" />
                         <input className="w-full rounded border bg-gray-100 p-2 text-xs" name="fullname" type="text" placeholder="Entre com seu nome completo" />
