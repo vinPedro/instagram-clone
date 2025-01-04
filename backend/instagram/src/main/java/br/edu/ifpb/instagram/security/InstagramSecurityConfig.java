@@ -18,36 +18,20 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class InstagramSecurityConfig {
 
-    @Autowired
-    private UserDetailsService userDetailsService;
-
     @Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http.csrf(customizer -> customizer.disable()).
+		return http.csrf(csrf -> csrf.disable()).
                 authorizeHttpRequests(request -> request
                         .requestMatchers("auth/login").permitAll()
-                        .anyRequest().authenticated()).
-                httpBasic(Customizer.withDefaults()).
-                sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .anyRequest().authenticated())
                 .build();
 	}
-
-
-     @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder());
-        provider.setUserDetailsService(userDetailsService);
-
-        return provider;
-    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
 
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
