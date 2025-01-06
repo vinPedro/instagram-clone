@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import { loginUser } from './services/api/signin';
 import Image from "next/image";
 import Link from "next/link";
@@ -8,10 +9,19 @@ import Footer from "./components/footer";
 
 export default function Home() {
 
+  const router = useRouter();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const jwtToken = localStorage.getItem("jwtToken");
+    if (jwtToken) {
+      router.push('/feed');
+    }
+  }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +31,7 @@ export default function Home() {
     try {
       const data = await loginUser({ username, password });
       localStorage.setItem("jwtToken", data.token);
+      router.push('/feed');
 
     } catch (error) {
       setError("Login failed: " + error.message);

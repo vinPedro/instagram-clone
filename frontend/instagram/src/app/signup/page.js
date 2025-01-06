@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Footer from '../components/footer';
 
 export default function Signup() {
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
