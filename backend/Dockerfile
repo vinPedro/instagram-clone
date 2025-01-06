@@ -7,4 +7,4 @@ RUN mkdir -p /home/instagram
 
 COPY ./instagram /home/instagram
 
-WORKDIR /home
+WORKDIR /home/instagram
