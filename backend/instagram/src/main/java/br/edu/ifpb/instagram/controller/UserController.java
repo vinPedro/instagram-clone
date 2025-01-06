@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +40,6 @@ public class UserController {
         return userDetailsResponseModels; // returns to frontend
     }
 
-
     @GetMapping("/{id}")
     public UserDetailsResponseModel getUser(@PathVariable Long id){
 
@@ -49,28 +47,6 @@ public class UserController {
         UserDetailsResponseModel userDetailsResponseModel = new UserDetailsResponseModel();
         BeanUtils.copyProperties(userDto, userDetailsResponseModel);
 
-        return userDetailsResponseModel;
-    }
-
-    @PostMapping
-    public UserDetailsResponseModel createUser(@RequestBody UserDetailsRequestModel userDetailsRequestModel){
-
-        // response that we will send back to frontend
-        UserDetailsResponseModel userDetailsResponseModel = new UserDetailsResponseModel();
-
-        // object to move across several layers
-        UserDto userDto = new UserDto();
-
-        // copies properties from userDetailsRequestModel to userDto
-        BeanUtils.copyProperties(userDetailsRequestModel, userDto);
-
-        // saves the object in the database
-        UserDto createdUserDto = userService.createUser(userDto);
-
-        // copies properties from createdUserDto to userDetailsResponseModel
-        BeanUtils.copyProperties(createdUserDto, userDetailsResponseModel);
-
-        // returns to frontend
         return userDetailsResponseModel;
     }
 
