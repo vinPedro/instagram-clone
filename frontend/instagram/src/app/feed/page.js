@@ -1,42 +1,22 @@
 import Image from "next/image";
 
 export default function Feed() {
-    // Simulando dados do feed
-    const posts = [
-        {
-            id: 1,
-            username: 'john_doe',
-            content: 'Hello, world! This is my first post.',
-            image: 'https://embratur.com.br/wp-content/uploads/2022/07/Embratur-Brasil-ultrapassa-marca-de-1-milhao-de-turistas-estrangeiros-recebidos-pela-primeira-vez-desde-2020-1.png',
-        },
-        {
-            id: 2,
-            username: 'jane_doe',
-            content: 'Just another post!',
-            image: 'https://assets-cdn.123rf.com/index/static/assets/top-section-bg.jpeg',
-        },
-        {
-            id: 3,
-            username: 'mark_smith',
-            content: 'Loving the new features on the platform.',
-            image: 'https://d2d9keg5qvul8r.cloudfront.net/wp-content/uploads/2019/07/16110310/img-destaque-viajar-operadora-peru-magnifico-montanha-sete-cores.jpg',
-        }
-    ];
 
     return (
-        <div className="feed-container">
-            <h1>The Feed</h1>
-            <div className="feed-posts">
-                {posts.map((post) => (
-                    <div key={post.id} className="feed-post">
-                        <h2>{post.username}</h2>
-                        <p>{post.content}</p>
-                        <div className="post-image">
-                            <img src={post.image} alt="Post image" width={500} height={300} />
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
+        <div className="grid items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+        <main className="flex flex-col gap-8 items-center">
+            <h1 className="text-3xl">GOOD JOB! 👍</h1>
+            <Image
+                src={'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3hhcHVrMXBjbGxhNmd6NGIxejB2Y3U3cmRhbjAxMXA5OTB6YzV0eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26FmRMFqoOcs18t9e/giphy.webp'}
+                layout={'responsive'}
+                height={175}
+                width={175}
+                alt={`friends`}
+                unoptimized={true}
+            />
+            <h1 className="text-3xl">Você está logado.</h1>
+            <h1 className="text-1xl">Aqui é era para ser o feed, quem sabe no futuro. 👷⚙️</h1>
+        </main>
+      </div>
     );
 }
