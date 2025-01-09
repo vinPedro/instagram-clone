@@ -15,11 +15,15 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingToken, setIsCheckingToken] = useState(true);
 
+  // Verifica se o token existe
   useEffect(() => {
-    const jwtToken = localStorage.getItem("jwtToken");
-    if (jwtToken) {
-      router.push('/feed');
+    const token = localStorage.getItem("jwtToken");
+    if (token) {
+      router.push("/feed");
+    } else {
+      setIsCheckingToken(false);
     }
   }, [router]);
 
@@ -39,6 +43,11 @@ export default function Home() {
 
     setIsLoading(false);
   };
+
+  if (isCheckingToken) {
+    // Enquanto verifica o token, mostra apenas um carregando (ou nada)
+    return <div className="text-center mt-10">loading...</div>;
+  }
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
