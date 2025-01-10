@@ -1,4 +1,4 @@
-# Simple Instagram Clone
+# Instagram Clone
 
 Este é um projeto de um clone simples do Instagram utilizando Docker, MariaDB, Spring Boot para o backend e NextJS com Tailwind CSS para o frontend. O objetivo deste projeto é permitir que vocês desenvolvam testes unitários para as funcionalidades implementadas.
 
