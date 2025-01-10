@@ -5,6 +5,7 @@ services:
     command: bash
     build:
       context: ./backend
+    container_name: instagram-clone-backend
     ports:
       - "8080:8080"
     volumes:
@@ -16,6 +17,7 @@ services:
     command: bash
     build:
       context: ./frontend
+    container_name: instagram-clone-frontend
     ports:
       - "3000:3000"
     volumes:
@@ -23,6 +25,7 @@ services:
 
   db:
     image: mariadb:lts
+    container_name: instagram-clone-db
     environment:
       - MARIADB_ROOT_PASSWORD=root_password
       - MARIADB_DATABASE=instagram_db
