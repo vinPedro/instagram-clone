@@ -9,11 +9,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import br.edu.ifpb.instagram.model.dto.UserDto;
@@ -28,11 +26,6 @@ public class UserServiceImplTest {
 
     @InjectMocks
     private UserServiceImpl userService; // Classe sob teste
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this); // Inicializa os mocks
-    }
 
     @Test
     void testFindById_ReturnsUserDto() {
