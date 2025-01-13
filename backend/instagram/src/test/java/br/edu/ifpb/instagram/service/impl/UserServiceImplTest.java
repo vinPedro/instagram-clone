@@ -22,10 +22,10 @@ import br.edu.ifpb.instagram.repository.UserRepository;
 public class UserServiceImplTest {
 
     @Mock
-    private UserRepository userRepository; // Repositório simulado
+    UserRepository userRepository; // Repositório simulado
 
     @InjectMocks
-    private UserServiceImpl userService; // Classe sob teste
+    UserServiceImpl userService; // Classe sob teste
 
     @Test
     void testFindById_ReturnsUserDto() {
