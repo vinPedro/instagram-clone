@@ -13,15 +13,15 @@ import br.edu.ifpb.instagram.model.request.LoginRequestModel;
 import br.edu.ifpb.instagram.model.request.UserDetailsRequestModel;
 import br.edu.ifpb.instagram.model.response.LoginResponseModel;
 import br.edu.ifpb.instagram.model.response.UserDetailsResponseModel;
-import br.edu.ifpb.instagram.service.AuthService;
 import br.edu.ifpb.instagram.service.UserService;
+import br.edu.ifpb.instagram.service.impl.AuthServiceImpl;
 
 @RestController
 @RequestMapping("auth")
 public class AuthController {
 
     @Autowired
-    private AuthService authService;
+    private AuthServiceImpl authService;
 
     @Autowired
     UserService userService;
