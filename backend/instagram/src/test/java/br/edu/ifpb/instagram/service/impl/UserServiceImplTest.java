@@ -12,7 +12,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import br.edu.ifpb.instagram.model.dto.UserDto;
 import br.edu.ifpb.instagram.model.entity.UserEntity;
@@ -21,10 +23,10 @@ import br.edu.ifpb.instagram.repository.UserRepository;
 @SpringBootTest
 public class UserServiceImplTest {
 
-    @Mock
+    @MockitoBean
     UserRepository userRepository; // Repositório simulado
 
-    @InjectMocks
+    @Autowired
     UserServiceImpl userService; // Classe sob teste
 
     @Test
