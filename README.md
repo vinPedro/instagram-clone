@@ -78,7 +78,7 @@ Os testes unitários devem ser executados corretamente, garantindo que as funcio
 
 ### 6. Conclusão
 
-**LEMBRE-SE DE SALVAR TODO O SEU PROGRESSO NO SEU GITHUB**.
+<span style="color:lightgreen">**LEMBRE-SE DE SALVAR TODO O SEU PROGRESSO NO SEU GITHUB**.</span>
 
 Este é o ambiente completo para o desenvolvimento do clone simples do Instagram. O próximo passo é realizar a implementação dos testes unitários, com base nas funcionalidades presentes no backend, e garantir que o código esteja funcionando de acordo com as expectativas.
 
