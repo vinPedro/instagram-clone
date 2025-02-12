@@ -3,7 +3,6 @@ package br.edu.ifpb.instagram.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,43 +22,62 @@ public class UserServiceImpl implements UserService{
     PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDto createUser(UserDto user) {
+    public UserDto createUser(UserDto userDto) {
 
         UserEntity userEntity = new UserEntity();
-        BeanUtils.copyProperties(user, userEntity, "id");
 
-        userEntity.setEncryptedPassword(passwordEncoder.encode(user.getPassword()));
+        userEntity.setUsername(userDto.username());
+        userEntity.setEmail(userDto.email());
+        userEntity.setFullName(userDto.fullName());
+        userEntity.setEncryptedPassword(passwordEncoder.encode(userDto.password()));
 
         UserEntity storedUserEntity = userRepository.save(userEntity);
 
-        UserDto returnUserDtoDetails = new UserDto();
-        BeanUtils.copyProperties(storedUserEntity, returnUserDtoDetails);
-
-        return returnUserDtoDetails;
+        return new UserDto(
+            storedUserEntity.getId(),
+            storedUserEntity.getFullName(),
+            storedUserEntity.getUsername(),
+            storedUserEntity.getEmail(),
+            null,
+            null);
     }
 
     @Override
-    public UserDto updateUser(UserDto user) {
+    public UserDto updateUser(UserDto userDto) {
 
-        if(user.getPassword() != null && !user.getPassword().isEmpty()){
-            user.setEncryptedPassword(passwordEncoder.encode(user.getPassword()));
-        }else {
-            user.setEncryptedPassword(null);
+        UserDto userDtoToSave;
+
+        if(userDto.password() != null && !userDto.password().isEmpty()){
+            userDtoToSave = new UserDto(
+                userDto.id(),
+                userDto.fullName(),
+                userDto.username(),
+                userDto.email(),
+                null,
+                passwordEncoder.encode(userDto.password()));
+        } else {
+            userDtoToSave = new UserDto(
+                userDto.id(),
+                userDto.fullName(),
+                userDto.username(),
+                userDto.email(),
+                null,
+                null);
         }
 
         Integer linhasModificadas = userRepository.updatePartialUser(
-                user.getFullName(),
-                user.getEmail(),
-                user.getUsername(),
-                user.getEncryptedPassword(),
-                user.getId()
+                userDtoToSave.fullName(),
+                userDtoToSave.email(),
+                userDtoToSave.username(),
+                userDtoToSave.encryptedPassword(),
+                userDtoToSave.id()
         );
 
         if (linhasModificadas == 0) {
             throw new RuntimeException("User not found");
         }
 
-        return user;
+        return userDtoToSave;
     }
 
     @Override
@@ -71,9 +89,14 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserDto findById(Long id) {
         UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userEntity, userDto);
-        return userDto;
+
+        return new UserDto(
+            userEntity.getId(),
+            userEntity.getFullName(),
+            userEntity.getUsername(),
+            userEntity.getEmail(),
+            null,
+            userEntity.getEncryptedPassword());
     }
 
     @Override
@@ -85,8 +108,14 @@ public class UserServiceImpl implements UserService{
             throw new RuntimeException("Users not found");
         }
         for (UserEntity userEntity : userEntities) {
-            UserDto userDto = new UserDto();
-            BeanUtils.copyProperties(userEntity, userDto);
+            UserDto userDto = new UserDto(
+                userEntity.getId(),
+                userEntity.getFullName(),
+                userEntity.getUsername(),
+                userEntity.getEmail(),
+                null,
+                userEntity.getEncryptedPassword());
+
             userDtos.add(userDto);
         }
 

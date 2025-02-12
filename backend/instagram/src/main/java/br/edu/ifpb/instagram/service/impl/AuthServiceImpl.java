@@ -6,7 +6,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import br.edu.ifpb.instagram.model.request.LoginRequestModel;
+import br.edu.ifpb.instagram.model.request.LoginRequest;
 import br.edu.ifpb.instagram.security.JwtUtils;
 
 @Service
@@ -18,12 +18,12 @@ public class AuthServiceImpl {
     @Autowired
     private JwtUtils jwtUtils;
 
-    public String authenticate(LoginRequestModel loginRequest) {
+    public String authenticate(LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
-                loginRequest.getUsername(),
-                loginRequest.getPassword()
+                loginRequest.username(),
+                loginRequest.password()
             )
         );
 

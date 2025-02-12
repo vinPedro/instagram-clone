@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,61 +13,74 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.ifpb.instagram.model.dto.UserDto;
-import br.edu.ifpb.instagram.model.request.UserDetailsRequestModel;
-import br.edu.ifpb.instagram.model.response.UserDetailsResponseModel;
+import br.edu.ifpb.instagram.model.request.UserDetailsRequest;
+import br.edu.ifpb.instagram.model.response.UserDetailsResponse;
 import br.edu.ifpb.instagram.service.UserService;
 
 @RestController
 @RequestMapping("users")
 public class UserController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
-    public List<UserDetailsResponseModel> getUsers(){
+    public List<UserDetailsResponse> getUsers(){
 
-        List<UserDto> userDtos = userService.findAll(); // get all users from database
-        List<UserDetailsResponseModel> userDetailsResponseModels = new ArrayList<>(); // response that we will send back to frontend
+        List<UserDto> userDtos = userService.findAll();
+        List<UserDetailsResponse> userDetailsResponses = new ArrayList<>();
 
         for (UserDto userDto : userDtos) {
-            UserDetailsResponseModel userDetailsResponseModel = new UserDetailsResponseModel(); // object to move across several layers
-            BeanUtils.copyProperties(userDto, userDetailsResponseModel); // copies properties from userDto to userDetailsResponseModel
-            userDetailsResponseModels.add(userDetailsResponseModel); // adds userDetailsResponseModel to userDetailsResponseModels
+            UserDetailsResponse userDetailsResponse = new UserDetailsResponse(
+                userDto.id(),
+                userDto.fullName(),
+                userDto.username(),
+                userDto.email()
+            );
+            userDetailsResponses.add(userDetailsResponse);
         }
 
-        return userDetailsResponseModels; // returns to frontend
+        return userDetailsResponses;
     }
 
     @GetMapping("/{id}")
-    public UserDetailsResponseModel getUser(@PathVariable Long id){
+    public UserDetailsResponse getUser(@PathVariable Long id){
 
         UserDto userDto = userService.findById(id);
-        UserDetailsResponseModel userDetailsResponseModel = new UserDetailsResponseModel();
-        BeanUtils.copyProperties(userDto, userDetailsResponseModel);
+        UserDetailsResponse userDetailsResponse = new UserDetailsResponse(
+            userDto.id(),
+            userDto.fullName(),
+            userDto.username(),
+            userDto.email()
+        );
+        BeanUtils.copyProperties(userDto, userDetailsResponse);
 
-        return userDetailsResponseModel;
+        return userDetailsResponse;
     }
 
     @PutMapping
-    public UserDetailsResponseModel updateUser(@RequestBody UserDetailsRequestModel userDetailsRequestModel){
-        // response that we will send back to frontend
-        UserDetailsResponseModel userDetailsResponseModel = new UserDetailsResponseModel();
+    public UserDetailsResponse updateUser(@RequestBody UserDetailsRequest userDetailsRequest){
 
-        // object to move across several layers
-        UserDto userDto = new UserDto();
+        UserDto userDto = new UserDto(
+            userDetailsRequest.id(),
+            userDetailsRequest.fullName(),
+            userDetailsRequest.username(),
+            userDetailsRequest.email(),
+            userDetailsRequest.password(),
+            null
+        );
 
-        // copies properties from userDetailsRequestModel to userDto
-        BeanUtils.copyProperties(userDetailsRequestModel, userDto);
-
-        // saves the object in the database
         UserDto updatedUserDto = userService.updateUser(userDto);
 
-        // copies properties from createdUserDto to userDetailsResponseModel
-        BeanUtils.copyProperties(updatedUserDto, userDetailsResponseModel);
-
-        // returns to frontend
-        return userDetailsResponseModel;
+        return new UserDetailsResponse(
+            updatedUserDto.id(),
+            updatedUserDto.fullName(),
+            updatedUserDto.username(),
+            updatedUserDto.email()
+        );
     }
 
     @DeleteMapping("/{id}")

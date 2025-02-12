@@ -10,8 +10,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -46,9 +44,9 @@ public class UserServiceImplTest {
 
         // Verificar o resultado
         assertNotNull(userDto);
-        assertEquals(mockUserEntity.getId(), userDto.getId());
-        assertEquals(mockUserEntity.getFullName(), userDto.getFullName());
-        assertEquals(mockUserEntity.getEmail(), userDto.getEmail());
+        assertEquals(mockUserEntity.getId(), userDto.id());
+        assertEquals(mockUserEntity.getFullName(), userDto.fullName());
+        assertEquals(mockUserEntity.getEmail(), userDto.email());
 
         // Verificar a interação com o mock
         verify(userRepository, times(1)).findById(userId);

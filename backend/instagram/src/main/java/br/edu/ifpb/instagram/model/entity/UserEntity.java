@@ -9,7 +9,6 @@ import jakarta.persistence.Id;
 
 @Entity(name = "users")
 public class UserEntity implements Serializable {
-    private static final long serialVersionUID = -4376108944411749501L;
 
     @Id
     @GeneratedValue

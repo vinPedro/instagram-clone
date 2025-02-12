@@ -1,7 +1,5 @@
 package br.edu.ifpb.instagram.controller;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,10 +7,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.edu.ifpb.instagram.model.dto.UserDto;
-import br.edu.ifpb.instagram.model.request.LoginRequestModel;
-import br.edu.ifpb.instagram.model.request.UserDetailsRequestModel;
-import br.edu.ifpb.instagram.model.response.LoginResponseModel;
-import br.edu.ifpb.instagram.model.response.UserDetailsResponseModel;
+import br.edu.ifpb.instagram.model.request.LoginRequest;
+import br.edu.ifpb.instagram.model.request.UserDetailsRequest;
+import br.edu.ifpb.instagram.model.response.LoginResponse;
+import br.edu.ifpb.instagram.model.response.UserDetailsResponse;
 import br.edu.ifpb.instagram.service.UserService;
 import br.edu.ifpb.instagram.service.impl.AuthServiceImpl;
 
@@ -20,40 +18,43 @@ import br.edu.ifpb.instagram.service.impl.AuthServiceImpl;
 @RequestMapping("auth")
 public class AuthController {
 
-    @Autowired
-    private AuthServiceImpl authService;
+    private final AuthServiceImpl authService;
+    private final UserService userService;
 
-    @Autowired
-    UserService userService;
+    public AuthController(AuthServiceImpl authService, UserService userService) {
+        this.authService = authService;
+        this.userService = userService;
+    }
 
     @PostMapping("/signin")
-    public ResponseEntity<LoginResponseModel> signIn(@RequestBody LoginRequestModel loginRequest) {
+    public ResponseEntity<LoginResponse> signIn(@RequestBody LoginRequest loginRequest) {
         String token = authService.authenticate(loginRequest);
-        LoginResponseModel loginResponseModel = new LoginResponseModel(loginRequest.getUsername(), token);
+        LoginResponse loginResponseModel = new LoginResponse(loginRequest.username(), token);
 
         return ResponseEntity.ok(loginResponseModel);
     }
 
     @PostMapping("/signup")
-    public UserDetailsResponseModel signUp(@RequestBody UserDetailsRequestModel userDetailsRequestModel){
-
-        // response that we will send back to frontend
-        UserDetailsResponseModel userDetailsResponseModel = new UserDetailsResponseModel();
+    public UserDetailsResponse signUp(@RequestBody UserDetailsRequest userDetailsRequest){
 
         // object to move across several layers
-        UserDto userDto = new UserDto();
+        UserDto userDto = new UserDto(
+            null,
+            userDetailsRequest.fullName(),
+            userDetailsRequest.username(),
+            userDetailsRequest.email(),
+            userDetailsRequest.password(),
+            null
+        );
 
-        // copies properties from userDetailsRequestModel to userDto
-        BeanUtils.copyProperties(userDetailsRequestModel, userDto);
-
-        // saves the object in the database
         UserDto createdUserDto = userService.createUser(userDto);
 
-        // copies properties from createdUserDto to userDetailsResponseModel
-        BeanUtils.copyProperties(createdUserDto, userDetailsResponseModel);
-
-        // returns to frontend
-        return userDetailsResponseModel;
+        return new UserDetailsResponse(
+            createdUserDto.id(),
+            createdUserDto.fullName(),
+            createdUserDto.username(),
+            createdUserDto.email()
+        );
     }
 
 }
