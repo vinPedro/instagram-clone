@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService{
         List<UserDto> userDtos = new ArrayList<>();
 
         if (userEntities.isEmpty()) {
-            throw new RuntimeException("Users not found");
+            return userDtos; // Return empty list if no users found
         }
         for (UserEntity userEntity : userEntities) {
             UserDto userDto = new UserDto(
