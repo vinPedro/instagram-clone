@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 
 @Repository
 public interface UserRepository extends CrudRepository<UserEntity, Long> {
+    boolean existsByEmail(String email);
+    boolean existsByUsername(String username);
     Optional<UserEntity> findByUsername(String username);
     List<UserEntity> findAll();
 

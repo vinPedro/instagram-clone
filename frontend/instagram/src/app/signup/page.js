@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { createUser } from '../services/api/signup';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import Footer from '../components/footer';
 
 export default function Signup() {
 
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -40,10 +42,11 @@ export default function Signup() {
     try {
       const data = await createUser(newUser);
       setSuccess('User created successfully!');
-
+      setTimeout(() => {
+                router.push('/');
+            }, 2000);
     } catch (error) {
-      setError('Error creating user. Please try again.');
-      console.error('Error:', error);
+      setError(error.message);
     }
   };
 

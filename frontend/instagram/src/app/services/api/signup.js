@@ -9,11 +9,18 @@ export async function createUser(user) {
         body: JSON.stringify(user),
     });
 
-    const data = await res.json();
 
     if (!res.ok) {
-        throw new Error('Error creating user');
+        const errorData = await res.json();
+
+        if (res.status === 409) {
+            throw new Error(errorData.message || 'E-mail or username already in use.');
+        }
+
+        throw new Error(errorData.message || 'An error occurred while creating the user.');
     }
+
+    const data = await res.json();
     console.log(data);
     return data;
 }

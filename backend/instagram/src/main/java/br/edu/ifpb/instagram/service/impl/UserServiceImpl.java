@@ -1,6 +1,6 @@
 package br.edu.ifpb.instagram.service.impl;
 
-import br.edu.ifpb.instagram.exception.EmailAlreadyExistsException;
+import br.edu.ifpb.instagram.exception.FieldAlreadyExistsException;
 import br.edu.ifpb.instagram.model.dto.UserDto;
 import br.edu.ifpb.instagram.model.entity.UserEntity;
 import br.edu.ifpb.instagram.repository.UserRepository;
@@ -25,7 +25,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         if (userRepository.existsByEmail(userDto.email())) {
-            throw new EmailAlreadyExistsException("O e-mail informado já está em uso.");
+            throw new FieldAlreadyExistsException("E-email already in use.");
+        }
+
+        if (userRepository.existsByUsername(userDto.username())) {
+            throw new FieldAlreadyExistsException("Username already in use.");
         }
 
         UserEntity userEntity = new UserEntity();
@@ -40,9 +44,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateUser(Long id, UserDto userDto) {
-        UserEntity userEntityToUpdate = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    public UserDto updateUser(UserDto userDto) {
+        if (userDto == null || userDto.id() == null) {
+            throw new IllegalArgumentException("UserDto or UserDto.id must not be null");
+        }
+
+        UserEntity userEntityToUpdate = userRepository.findById(userDto.id())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userDto.id()));
 
         userEntityToUpdate.setFullName(userDto.fullName());
         userEntityToUpdate.setUsername(userDto.username());

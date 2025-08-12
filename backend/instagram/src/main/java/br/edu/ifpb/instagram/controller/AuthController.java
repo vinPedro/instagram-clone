@@ -1,5 +1,6 @@
 package br.edu.ifpb.instagram.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public UserDetailsResponse signUp(@RequestBody UserDetailsRequest userDetailsRequest){
+    public ResponseEntity<UserDetailsResponse> signUp(@RequestBody UserDetailsRequest userDetailsRequest){
 
         // object to move across several layers
         UserDto userDto = new UserDto(
@@ -46,15 +47,15 @@ public class AuthController {
             userDetailsRequest.password(),
             null
         );
-
         UserDto createdUserDto = userService.createUser(userDto);
-
-        return new UserDetailsResponse(
+        UserDetailsResponse response = new UserDetailsResponse(
             createdUserDto.id(),
             createdUserDto.fullName(),
             createdUserDto.username(),
             createdUserDto.email()
         );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 }
