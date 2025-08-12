@@ -2,7 +2,7 @@ services:
   backend:
     stdin_open: true
     tty: true
-    command: bash
+    command: tail -f /dev/null
     build:
       context: ./backend
     container_name: instagram-clone-backend
@@ -14,7 +14,6 @@ services:
   frontend:
     stdin_open: true
     tty: true
-    command: bash
     build:
       context: ./frontend
     container_name: instagram-clone-frontend

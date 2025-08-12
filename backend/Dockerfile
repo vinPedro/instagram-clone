@@ -1,4 +1,4 @@
-FROM maven:3.9.9-amazoncorretto-23
+FROM maven:3.9.11-amazoncorretto-24-alpine
 LABEL maintainer="paulopereira.dev"
 
 EXPOSE 8080

@@ -31,7 +31,7 @@ export default function Signup() {
     setSuccess('');
 
     const newUser = {
-      fullName: formData.fullname,
+      fullName: formData.fullName,
       username: formData.username,
       email: formData.email,
       password: formData.password,
@@ -84,10 +84,10 @@ export default function Signup() {
               />
               <input
                 className="w-full rounded border bg-gray-100 p-2 text-xs"
-                name="fullname"
+                name="fullName"
                 type="text"
                 placeholder="Entre com seu nome completo"
-                value={formData.fullname}
+                value={formData.fullName}
                 onChange={handleChange}
               />
               <input
@@ -105,8 +105,8 @@ export default function Signup() {
                 Sign up
               </button>
             </form>
-            {success && <div className="text-green-500">{success}</div>}
-            {error && <div className="text-red-500">{error}</div>}
+            {success && <div className="text-green-500 text-center">{success}</div>}
+            {error && <div className="text-red-500 text-center">{error}</div>}
           </div>
         </div>
       </main>
