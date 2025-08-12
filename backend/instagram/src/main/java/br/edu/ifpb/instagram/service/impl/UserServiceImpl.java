@@ -1,31 +1,34 @@
 package br.edu.ifpb.instagram.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import br.edu.ifpb.instagram.exception.EmailAlreadyExistsException;
+import br.edu.ifpb.instagram.model.dto.UserDto;
+import br.edu.ifpb.instagram.model.entity.UserEntity;
+import br.edu.ifpb.instagram.repository.UserRepository;
+import br.edu.ifpb.instagram.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import br.edu.ifpb.instagram.model.entity.UserEntity;
-import br.edu.ifpb.instagram.model.dto.UserDto;
-import br.edu.ifpb.instagram.repository.UserRepository;
-import br.edu.ifpb.instagram.service.UserService;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
-    @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        if (userRepository.existsByEmail(userDto.email())) {
+            throw new EmailAlreadyExistsException("O e-mail informado já está em uso.");
+        }
 
         UserEntity userEntity = new UserEntity();
-
         userEntity.setUsername(userDto.username());
         userEntity.setEmail(userDto.email());
         userEntity.setFullName(userDto.fullName());
@@ -33,93 +36,58 @@ public class UserServiceImpl implements UserService{
 
         UserEntity storedUserEntity = userRepository.save(userEntity);
 
-        return new UserDto(
-            storedUserEntity.getId(),
-            storedUserEntity.getFullName(),
-            storedUserEntity.getUsername(),
-            storedUserEntity.getEmail(),
-            null,
-            null);
+        return mapToDto(storedUserEntity); // 3. Usando método auxiliar
     }
 
     @Override
-    public UserDto updateUser(UserDto userDto) {
+    public UserDto updateUser(Long id, UserDto userDto) {
+        UserEntity userEntityToUpdate = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
 
-        UserDto userDtoToSave;
+        userEntityToUpdate.setFullName(userDto.fullName());
+        userEntityToUpdate.setUsername(userDto.username());
+        userEntityToUpdate.setEmail(userDto.email());
 
-        if(userDto.password() != null && !userDto.password().isEmpty()){
-            userDtoToSave = new UserDto(
-                userDto.id(),
-                userDto.fullName(),
-                userDto.username(),
-                userDto.email(),
-                null,
-                passwordEncoder.encode(userDto.password()));
-        } else {
-            userDtoToSave = new UserDto(
-                userDto.id(),
-                userDto.fullName(),
-                userDto.username(),
-                userDto.email(),
-                null,
-                null);
+        if (userDto.password() != null && !userDto.password().trim().isEmpty()) {
+            userEntityToUpdate.setEncryptedPassword(passwordEncoder.encode(userDto.password()));
         }
 
-        Integer linhasModificadas = userRepository.updatePartialUser(
-                userDtoToSave.fullName(),
-                userDtoToSave.email(),
-                userDtoToSave.username(),
-                userDtoToSave.encryptedPassword(),
-                userDtoToSave.id()
-        );
+        UserEntity updatedUser = userRepository.save(userEntityToUpdate);
 
-        if (linhasModificadas == 0) {
-            throw new RuntimeException("User not found");
-        }
-
-        return userDtoToSave;
+        return mapToDto(updatedUser);
     }
 
     @Override
     public void deleteUser(Long id) {
-
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("User not found with id: " + id);
+        }
         userRepository.deleteById(id);
     }
 
     @Override
     public UserDto findById(Long id) {
-        UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-
-        return new UserDto(
-            userEntity.getId(),
-            userEntity.getFullName(),
-            userEntity.getUsername(),
-            userEntity.getEmail(),
-            null,
-            userEntity.getEncryptedPassword());
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        return mapToDto(userEntity);
     }
 
     @Override
     public List<UserDto> findAll() {
-        List<UserEntity> userEntities = userRepository.findAll();
-        List<UserDto> userDtos = new ArrayList<>();
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
 
-        if (userEntities.isEmpty()) {
-            return userDtos; // Return empty list if no users found
-        }
-        for (UserEntity userEntity : userEntities) {
-            UserDto userDto = new UserDto(
+    private UserDto mapToDto(UserEntity userEntity) {
+        return new UserDto(
                 userEntity.getId(),
                 userEntity.getFullName(),
                 userEntity.getUsername(),
                 userEntity.getEmail(),
                 null,
-                userEntity.getEncryptedPassword());
-
-            userDtos.add(userDto);
-        }
-
-        return userDtos;
+                null
+        );
     }
-
 }
