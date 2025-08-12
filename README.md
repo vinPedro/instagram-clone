@@ -49,22 +49,16 @@ mvn clean spring-boot:run
 
 Agora, o backend estará em execução.
 
-### 4. Executando o Frontend
-Para rodar o frontend (NextJS) dentro do container Docker, siga os passos abaixo:
+### 4. O Frontend executa automaticamente
+O frontend executa automanticamente, não há necessidade de acessar o terminal e executar nenhum comando.
 
-1. Entre no terminal do container do frontend:
+Você pode acessar a aplicação frontend no navegador, indo para `http://localhost:3000`.
 
-```bash
-docker container exec -it instagram-clone-frontend bash
-```
-
-2. Execute o frontend utilizando o npm:
+Para visualizar os logs e analisar se houve algum erro na execução do frontend, execute o comando abaixo:
 
 ```bash
-npm run dev
+docker container logs -f instagram-clone-frontend
 ```
-
-Agora, você pode acessar a aplicação frontend no navegador, indo para `http://localhost:3000`.
 
 ### 5. Executando os Testes Unitários do Backend
 
