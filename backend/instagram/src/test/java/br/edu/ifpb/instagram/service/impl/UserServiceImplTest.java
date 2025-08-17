@@ -1,11 +1,11 @@
 package br.edu.ifpb.instagram.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import br.edu.ifpb.instagram.exception.FieldAlreadyExistsException;
@@ -223,6 +223,58 @@ public class UserServiceImplTest {
 
         verify(passwordEncoder).encode("novaSenha");
         verify(userRepository).save(any(UserEntity.class));
+    }
+
+    @Test
+    void testDeleteUser_ShouldDeleteById_WhenUserExists() {
+        Long userId = 1L;
+        when(userRepository.existsById(userId)).thenReturn(true);
+        doNothing().when(userRepository).deleteById(userId);
+        userService.deleteUser(userId);
+        verify(userRepository, times(1)).existsById(userId);
+        verify(userRepository, times(1)).deleteById(userId);
+    }
+
+    @Test
+    void testDeleteUser_ShouldThrowException_WhenUserNotFound() {
+        Long userId = 1234L;
+        when(userRepository.existsById(userId)).thenReturn(false);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            userService.deleteUser(userId);
+        });
+        assertEquals("User not found with id: " + userId, exception.getMessage());
+        verify(userRepository, times(1)).existsById(userId);
+        verify(userRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void testFindAll_ShouldReturnUserDtoList_WhenUsersExist() {
+        UserEntity user1 = new UserEntity();
+        user1.setId(1L);
+        user1.setFullName("Matheus Rafael");
+        user1.setUsername("mths");
+        user1.setEmail("mthsrfl@gmail.com");
+        UserEntity user2 = new UserEntity();
+        user2.setId(2L);
+        user2.setFullName("Rey Soares");
+        user2.setUsername("reysrs");
+        user2.setEmail("reysrs@example.com");
+        when(userRepository.findAll()).thenReturn(List.of(user1, user2));
+        List<UserDto> result = userService.findAll();
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("mths", result.get(0).username());
+        assertEquals("reysrs", result.get(1).username());
+        verify(userRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testFindAll_ShouldReturnEmptyList_WhenNoUsersExist() {
+        when(userRepository.findAll()).thenReturn(Collections.emptyList());
+        List<UserDto> result = userService.findAll();
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(userRepository, times(1)).findAll();
     }
 
 }
