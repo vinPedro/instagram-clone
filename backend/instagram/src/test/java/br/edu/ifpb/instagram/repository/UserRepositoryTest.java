@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,6 +29,52 @@ class UserRepositoryTest {
         user.setUsername("johndoe");
         user.setEncryptedPassword("hashedpassword");
         return userRepository.save(user);
+    }
+
+    private UserEntity createUser(String name, String username, String email) {
+        UserEntity user = new UserEntity();
+        user.setFullName(name);
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setEncryptedPassword("hashedpassword");
+        return userRepository.save(user);
+    }
+
+    @Test
+    @DisplayName("Deve buscar usuário por ID (Read)")
+    void testReadUser() {
+        UserEntity saved = createUser();
+
+        Optional<UserEntity> found = userRepository.findById(saved.getId());
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getUsername()).isEqualTo("johndoe");
+    }
+
+    @Test
+    @DisplayName("Deve atualizar dados do usuário (Update)")
+    void testUpdateUser() {
+        UserEntity saved = createUser();
+
+        saved.setEmail("newjohn@example.com");
+        saved.setFullName("John Updated");
+
+        UserEntity updated = userRepository.save(saved);
+
+        assertThat(updated.getEmail()).isEqualTo("newjohn@example.com");
+        assertThat(updated.getFullName()).isEqualTo("John Updated");
+    }
+
+    @Test
+    @DisplayName("Deve deletar usuário por ID (Delete)")
+    void testDeleteUser() {
+        UserEntity saved = createUser();
+        Long id = saved.getId();
+
+        userRepository.deleteById(id);
+
+        Optional<UserEntity> deleted = userRepository.findById(id);
+        assertThat(deleted).isEmpty();
     }
 
     @Test
@@ -53,6 +100,21 @@ class UserRepositoryTest {
         Optional<UserEntity> found = userRepository.findByUsername("johndoe");
         assertThat(found).isPresent();
         assertThat(found.get().getEmail()).isEqualTo("john@example.com");
+    }
+
+    @Test
+    @DisplayName("Deve retornar todos os usuários cadastrados (findAll)")
+    void testFindAll() {
+        createUser("John Doe", "johndoe", "john@example.com");
+        createUser("Maria Silva", "maria", "maria@example.com");
+        createUser("Carlos Souza", "carlos", "carlos@example.com");
+
+        List<UserEntity> users = userRepository.findAll();
+
+        assertThat(users).hasSize(3);
+        assertThat(users)
+                .extracting(UserEntity::getUsername)
+                .containsExactlyInAnyOrder("johndoe", "maria", "carlos");
     }
 
 
