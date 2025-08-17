@@ -47,4 +47,46 @@ public class JwtUtilsTest {
             jwtUtils.getUsernameFromToken(invalidToken);
         });
     }
+
+    @Test
+    void testValidateToken_ShouldReturnTrue_ForValidToken() {
+        when(authentication.getName()).thenReturn("mthstest");
+        String validToken = jwtUtils.generateToken(authentication);
+        assertTrue(jwtUtils.validateToken(validToken));
+    }
+
+    @Test
+    void testValidateToken_ShouldReturnFalse_ForInvalidSignatureToken() {
+        String invalidSecretKey = "outraChaveMuitoSeguraDePeloMenos64CaracteresParaHS512JwtAlgoritmo";
+        byte[] invalidJwtSecret = java.util.Base64.getEncoder().encode(invalidSecretKey.getBytes());
+        String tokenWithInvalidSignature = io.jsonwebtoken.Jwts.builder()
+                .setSubject("mthstest")
+                .setIssuedAt(new java.util.Date())
+                .setExpiration(new java.util.Date(System.currentTimeMillis() + 10000))
+                .signWith(io.jsonwebtoken.security.Keys.hmacShaKeyFor(invalidJwtSecret), io.jsonwebtoken.SignatureAlgorithm.HS512)
+                .compact();
+
+        assertFalse(jwtUtils.validateToken(tokenWithInvalidSignature));
+    }
+
+    @Test
+    void testValidateToken_ShouldReturnFalse_ForExpiredToken() {
+        String SECRET_KEY = "umaChaveMuitoSeguraDePeloMenos64CaracteresParaHS512JwtAlgoritmo";
+        byte[] jwtSecret = java.util.Base64.getEncoder().encode(SECRET_KEY.getBytes());
+        String expiredToken = io.jsonwebtoken.Jwts.builder()
+                .setSubject("mthstest")
+                .setIssuedAt(new java.util.Date())
+                .setExpiration(new java.util.Date(System.currentTimeMillis() - 1000))
+                .signWith(io.jsonwebtoken.security.Keys.hmacShaKeyFor(jwtSecret), io.jsonwebtoken.SignatureAlgorithm.HS512)
+                .compact();
+        assertFalse(jwtUtils.validateToken(expiredToken));
+    }
+
+    @Test
+    void testValidateToken_ShouldReturnFalse_ForNullOrEmptyToken() {
+        boolean isNullTokenValid = jwtUtils.validateToken(null);
+        boolean isEmptyTokenValid = jwtUtils.validateToken("");
+        assertFalse(isNullTokenValid, "null token should be invalid");
+        assertFalse(isEmptyTokenValid, "empty token should be invalid");
+    }
 }
