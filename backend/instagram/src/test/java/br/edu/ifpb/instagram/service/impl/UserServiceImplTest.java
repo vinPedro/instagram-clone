@@ -1,17 +1,18 @@
 package br.edu.ifpb.instagram.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
+import br.edu.ifpb.instagram.exception.FieldAlreadyExistsException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import br.edu.ifpb.instagram.model.dto.UserDto;
@@ -23,6 +24,9 @@ public class UserServiceImplTest {
 
     @MockitoBean
     UserRepository userRepository; // Repositório simulado
+
+    @MockitoBean
+    PasswordEncoder passwordEncoder; //
 
     @Autowired
     UserServiceImpl userService; // Classe sob teste
@@ -64,9 +68,213 @@ public class UserServiceImplTest {
             userService.findById(userId);
         });
 
-        assertEquals("User not found", exception.getMessage());
+        assertEquals("User not found with id: " + userId, exception.getMessage());
 
         // Verificar a interação com o mock
         verify(userRepository, times(1)).findById(userId);
     }
+
+    @Test
+    void testCreateUser_ShouldSaveAndReturnUser_WhenValid() {
+
+        UserDto dto = new UserDto(null,"Pedro teste", "Pedro", "pedro@example.com", "123456", null);
+
+        when(userRepository.existsByEmail(dto.email())).thenReturn(false);
+        when(userRepository.existsByUsername(dto.username())).thenReturn(false);
+        when(passwordEncoder.encode(dto.password())).thenReturn("encodedPass");
+
+        UserEntity savedEntity = new UserEntity();
+        savedEntity.setId(1L);
+        savedEntity.setFullName("Pedro teste");
+        savedEntity.setUsername("Pedro");
+        savedEntity.setEmail("pedro@example.com");
+        savedEntity.setEncryptedPassword("encodedPass");
+
+        when(userRepository.save(any(UserEntity.class))).thenReturn(savedEntity);
+
+        // Executar o método a ser testado
+        UserDto result = userService.createUser(dto);
+
+        // Verificar o resultado
+        assertNotNull(result);
+        assertEquals("Pedro", result.username());
+        assertEquals("pedro@example.com", result.email());
+        assertEquals("Pedro teste", result.fullName());
+
+        verify(userRepository).save(any(UserEntity.class));
+        verify(passwordEncoder).encode("123456");
+        verify(userRepository).existsByEmail(dto.email());
+        verify(userRepository).existsByUsername(dto.username());
+
+    }
+
+
+    @Test
+    void testCreateUser_ShouldThrowException_WhenEmailExists() {
+
+        UserDto dto = new UserDto(null,"Pedro teste", "Pedro", "pedro@example.com", "123456", null);
+
+        when(userRepository.existsByEmail(dto.email())).thenReturn(true);
+
+        FieldAlreadyExistsException ex = assertThrows(FieldAlreadyExistsException.class,
+                () -> userService.createUser(dto));
+
+        assertEquals("E-email already in use.", ex.getMessage());
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void testCreateUser_ShouldThrowException_WhenUsernameExists() {
+
+        UserDto dto = new UserDto(null,"Pedro teste", "Pedro", "pedro@example.com", "123456", null);
+
+        when(userRepository.existsByEmail(dto.email())).thenReturn(false);
+        when(userRepository.existsByUsername(dto.username())).thenReturn(true);
+
+        FieldAlreadyExistsException ex = assertThrows(FieldAlreadyExistsException.class,
+                () -> userService.createUser(dto));
+
+        assertEquals("Username already in use.", ex.getMessage());
+
+        verify(userRepository, never()).save(any());
+        verify(userRepository).existsByEmail(dto.email());
+    }
+
+    @Test
+    void testUpdateUser_ShouldThrowException_WhenUserDtoIsNull() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> userService.updateUser(null));
+
+        assertEquals("UserDto or UserDto.id must not be null", ex.getMessage());
+        verify(userRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void testUpdateUser_ShouldThrowException_WhenUserDtoIdIsNull() {
+        UserDto dto = new UserDto(null, "Pedro teste", "Pedro", "pedro@example.com", "123456", null);
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> userService.updateUser(dto));
+
+        assertEquals("UserDto or UserDto.id must not be null", ex.getMessage());
+        verify(userRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void testUpdateUser_ShouldThrowException_WhenUserNotFound() {
+        UserDto dto = new UserDto(1L, "Pedro teste", "Pedro", "pedro@example.com", "123456", null);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userService.updateUser(dto));
+
+        assertEquals("User not found with id: 1", ex.getMessage());
+
+        verify(userRepository).findById(1L);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdateUser_ShouldUpdateUser_WhenPasswordIsNull() {
+        UserDto dto = new UserDto(1L, "Pedro atualizado", "PedroUser", "pedro@example.com", null, null);
+
+        UserEntity existingUser = new UserEntity();
+        existingUser.setId(1L);
+        existingUser.setFullName("Pedro antigo");
+        existingUser.setUsername("Pedro");
+        existingUser.setEmail("pedro@example.com");
+        existingUser.setEncryptedPassword("oldPass");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserDto result = userService.updateUser(dto);
+
+        assertEquals("Pedro atualizado", result.fullName());
+        assertEquals("PedroUser", result.username());
+        assertEquals("pedro@example.com", result.email());
+
+        verify(passwordEncoder, never()).encode(anyString());
+        verify(userRepository).save(any(UserEntity.class));
+    }
+
+    @Test
+    void testUpdateUser_ShouldUpdateUser_WhenPasswordIsProvided() {
+        UserDto dto = new UserDto(1L, "Pedro atualizado", "PedroUser", "pedro@example.com", "novaSenha", null);
+
+        UserEntity existingUser = new UserEntity();
+        existingUser.setId(1L);
+        existingUser.setFullName("Pedro antigo");
+        existingUser.setUsername("Pedro");
+        existingUser.setEmail("pedro@example.com");
+        existingUser.setEncryptedPassword("oldPass");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(passwordEncoder.encode("novaSenha")).thenReturn("encodedNovaSenha");
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserDto result = userService.updateUser(dto);
+
+        assertEquals("Pedro atualizado", result.fullName());
+        assertEquals("PedroUser", result.username());
+        assertEquals("pedro@example.com", result.email());
+
+        verify(passwordEncoder).encode("novaSenha");
+        verify(userRepository).save(any(UserEntity.class));
+    }
+
+    @Test
+    void testDeleteUser_ShouldDeleteById_WhenUserExists() {
+        Long userId = 1L;
+        when(userRepository.existsById(userId)).thenReturn(true);
+        doNothing().when(userRepository).deleteById(userId);
+        userService.deleteUser(userId);
+        verify(userRepository, times(1)).existsById(userId);
+        verify(userRepository, times(1)).deleteById(userId);
+    }
+
+    @Test
+    void testDeleteUser_ShouldThrowException_WhenUserNotFound() {
+        Long userId = 1234L;
+        when(userRepository.existsById(userId)).thenReturn(false);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            userService.deleteUser(userId);
+        });
+        assertEquals("User not found with id: " + userId, exception.getMessage());
+        verify(userRepository, times(1)).existsById(userId);
+        verify(userRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void testFindAll_ShouldReturnUserDtoList_WhenUsersExist() {
+        UserEntity user1 = new UserEntity();
+        user1.setId(1L);
+        user1.setFullName("Matheus Rafael");
+        user1.setUsername("mths");
+        user1.setEmail("mthsrfl@gmail.com");
+        UserEntity user2 = new UserEntity();
+        user2.setId(2L);
+        user2.setFullName("Rey Soares");
+        user2.setUsername("reysrs");
+        user2.setEmail("reysrs@example.com");
+        when(userRepository.findAll()).thenReturn(List.of(user1, user2));
+        List<UserDto> result = userService.findAll();
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("mths", result.get(0).username());
+        assertEquals("reysrs", result.get(1).username());
+        verify(userRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testFindAll_ShouldReturnEmptyList_WhenNoUsersExist() {
+        when(userRepository.findAll()).thenReturn(Collections.emptyList());
+        List<UserDto> result = userService.findAll();
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(userRepository, times(1)).findAll();
+    }
+
 }
