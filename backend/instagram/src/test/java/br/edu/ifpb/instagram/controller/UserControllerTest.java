@@ -98,7 +98,6 @@ public class UserControllerTest {
         mockMvc.perform(get("/users/{id}", usuarioDeTeste.getId())
                         .header("Authorization", "Bearer " + authToken))
                 .andExpect(status().isOk())
-                // CORREÇÃO APLICADA AQUI:
                 .andExpect(jsonPath("$.id", is((int) usuarioDeTeste.getId())))
                 .andExpect(jsonPath("$.username", is("usuario.teste")));
     }
@@ -141,6 +140,7 @@ public class UserControllerTest {
     @DisplayName("Deve retornar erro 403 (Forbidden) ao acessar sem token")
     void listarUsuarios_DeveRetornarAcessoNegado_QuandoNaoAutenticado() throws Exception {
         mockMvc.perform(get("/users"))
+                // 403 Forbidden
                 .andExpect(status().isForbidden());
     }
 }
